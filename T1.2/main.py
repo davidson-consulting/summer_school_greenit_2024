@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 def parseArguments ():
     parser = argparse.ArgumentParser ()
     parser.add_argument ("--func_name", default="sqrt")
-    parser.add_argument ("--nb_ops", type=int, default=10000)
-    parser.add_argument ("--estimate_dur", type=int, default=5)
+    parser.add_argument ("--nb_ops", type=int, default=30000)
+    parser.add_argument ("--estimate_dur", type=int, default=20)
     parser.add_argument ("--min_cpu", default=1)
     parser.add_argument ("--max_cpu", default=os.cpu_count ())
 
@@ -23,16 +23,8 @@ def get_pids_in_cgroup(cgroup):
 
 
 def jsonSplitLoad () :
-    results = []
     with open("/tmp/results.json", "r") as f:
-        splits = f.read ().split ("}{")
-        for s in splits :
-            if (s [-1] != '}') :
-                s = s + '}'
-            if (s [0] != '{') :
-                s = '{' + s
-            results.append (json.loads (s))
-        return results
+        return json.load (f)
 
 def plotResult (pids, power, power_host, nbCores) :
     plt.clf ()
@@ -59,17 +51,20 @@ def exportResults (pids, nbCores):
     with open(f".output/{nbCores}", "w+") as f:
         f.write(str(power))
 
+    sums = [sum ([power [i][p] for i in range(len (power))]) for p in pids]
+    maxes = [max ([power [i][p] for i in range(len (power))]) for p in pids]
+
     with open(f".output/{nbCores}_host", "w+") as f:
         f.write(str(power_host))
 
     plotResult (pids, power, power_host, nbCores)
 
-    return max (power_host)
+    return (max (power_host), max (maxes), sum (power_host), max (sums))
 
 def startScaphandre (nbCores, estimateDur):
     if os.path.isfile("/tmp/results.json"):
         os.remove("/tmp/results.json")
-    pid = subprocess.Popen (["scaphandre", "json", "--max-top-consumers", str (nbCores + 1), "-t", str (estimateDur), "-s", "0", "--step-nano", "100000000",  "-f", "/tmp/results.json"])
+    pid = subprocess.Popen (["scaphandre", "json", "--max-top-consumers", "50", "-t", str (estimateDur), "-s", "0", "-n", "100000000",  "-f", "/tmp/results.json"])
 
     return pid
 
@@ -99,14 +94,30 @@ def runExperiment (functionName, nbCores, nbOps, estimateDur):
 def main (arguments) :
     subprocess.run(["cgcreate", "-g", "cpu:pg1"])
 
-    maxes = []
+    hostP = []
+    processP = []
+    hostE = []
+    processE = []
+
     for nbCores in range (arguments.min_cpu, arguments.max_cpu + 1) :
-        host = runExperiment (arguments.func_name, nbCores, arguments.nb_ops, arguments.estimate_dur)
-        maxes.append (host)
+        (host_power, process_power, host_energy, process_energy) = runExperiment (arguments.func_name, nbCores, arguments.nb_ops, arguments.estimate_dur)
+        hostP.append (host_power)
+        processP.append (process_power)
+
+        hostE.append (host_energy)
+        processE.append (process_energy)
 
     plt.clf ()
-    plt.plot (maxes)
-    plt.savefig (".output/host_curve.png", dpi=400)
+    plt.plot (hostP, label="host")
+    plt.plot (processP, label="process")
+    plt.legend ()
+    plt.savefig (".output/power_curve.png", dpi=400)
+
+    plt.clf ()
+    plt.plot (hostE, label="host")
+    plt.plot (processE, label="process")
+    plt.legend ()
+    plt.savefig (".output/energy_curve.png", dpi=400)
 
 if __name__ == "__main__" :
     main (parseArguments ())
