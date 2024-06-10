@@ -19,12 +19,15 @@ Déploiement de l'OS : `kadeploy3 ubuntu2204-min`
 
 Installation des dépendances : 
 - Quelques packages `apt install stress-ng git`
-- Scaphandre 
+- Scaphandre (https://github.com/hubblo-org/scaphandre) - Nous utiliserons la version 0.5.0 de Scaphandre
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 
 Ces applications, en plus d'être facile à lancer, conduisent à une consommation de ressource très stables et peuvent être configurées pour consommer une 
 quantité de ressources données. 
+
+**Note :** Stress est une suite d'applications permettant d'effectuer des tests de montée en charge configurables sur différents composants d'un serveur (CPU, mémoire, 
+IO, ...). 
 
 Scaphandre peut s'utiliser de plusieurs façon : 
 - En mode "ligne de commande" : en sélectionnant une sortie `stdout`, Scaphandre affiche la consommation estimée des 15 processus les plus consommateurs
@@ -32,21 +35,24 @@ Scaphandre peut s'utiliser de plusieurs façon :
 - En mode "export" : Scaphandre peut exporter ses résultats vers un composant tier comme Prometheus. Un fichier docler-compose est proposé dans le répertoire
 Github du projet pour déployer facilement un Dashboard Scaphandre. 
 
-### Tâche 1 - Puissance sur un coeur CPU
+### Tâche 1.1 - Puissance sur un coeur CPU
 Dans un premier temps, nous allons découvrir Scaphandre en le testant sur diverses fonctions stress. Vous pouvez trouver la liste des fonctions proposées 
 par stress via la commande `stress-ng --cpu-method which`. En lançant divers stress sur un même nombre de CPU, voyez-vous une différence de consommation ? 
-Lister quelques exemples de commandes stress et leur coût associé par coeurs.
+Lister quelques exemples de commandes stress et leur coût associé en Watts.
 
 Ecrire un script python permettant de lancer une commande stress passée en paramètre et d'évaluer sa consommation via Scaphandre.
 
-### Tâche 2 - Puissance sur plusieurs coeurs CPU 
+### Tâche 1.2 - Puissance sur plusieurs coeurs CPU 
 Nous allons maintenant évaluer la consommation d'un même stress sur plusieurs coeurs. Pour charger N coeurs, stress lance N instances de l'application 
-demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donné, évaluer sa consommation quand il est lancé sur 1 coeur, puis 2, ... jusqu'au nombre
-maximum de coeurs. Qu'en déduisez-vous ?
+demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donné, évaluer sa consommation quand il est lancé sur 1 coeur, puis plusieurs. Qu'en déduisez-vous ?
 
-Pouvez-vous automatiser une telle expérimentation en Python ?
+Pouvez-vous automatiser une telle expérimentation en Python ? Reproduire l'expérimentation sur plusieurs opérations de stress différentes.
 
-### Tâche 3 - Puissance sur plusieurs programmes en parallèle
+Des utilitaires comme HTOP sont très pratique pour étudier la consommation de ressources de notre serveur en temps réel. Etudier la consommation énergétique de nos 
+différents stress en comparaison de leur consommation CPU. Que pourriez-vous en déduire entre le lien entre charge CPU et consommation énergétique ? 
+
+
+### Tâche 1.3 - Puissance sur plusieurs programmes en parallèle
 Nous avons vu qu'un même programme peut induire une consommation différente selon son contexte d'execution. Nous allons illustrer cela un peu plus en étudiant la 
 consommation d'un stress selon qu'il est lancé seul ou en parallèle d'autres stress. Le scénario d'expérimentation est le suivant : lancer un premier stress et 
 étudier sa consommation énergétique. Lancer un second stress en parallèle du premier. Qu'observez-vous ?
@@ -54,7 +60,7 @@ consommation d'un stress selon qu'il est lancé seul ou en parallèle d'autres s
 Note : L'inconvénient d'utiliser que des stress est que le nom de toutes les applications sera le même. Il va être important de récupérer le PID des différents
 stress lancés pour pouvoir les distinguer par la suite. 
 
-### Tâche 4 - Consommation énergétique d'un stress
+### Tâche 1.4 - Consommation énergétique d'un stress
 Nous nous sommes intéressés ici qu'à la puissance estimée d'un stress selon son contexte d'execution. Nous avons vu notamment qu'elle diminue 
 en fontion du nombre de stress lancé. Qu'en est-il de sa consommation énergétique ? 
 
@@ -67,7 +73,7 @@ d'opérations sur un coeur et estimez sa consommation en joules. Lancez ce même
 Nous avons vu dans la première partie que la consommation énergétique d'un programme (ici *stress*) peut fluctuer en fonction de son environnement d'execution. 
 Nous allons dans cette partie essayer de comprendre un peu mieux pourquoi.
 
-### Tâche 1 - Profil de consommation d'un serveur 
+### Tâche 2.1 - Profil de consommation d'un serveur 
 Nous avons vu dans la tâche 1.2 qu'un même stress ne consommait pas autant d'énergie selon s'il était lancé sur un ou plusieurs coeurs en parallèle. Nous voulons
 ici étudier l'évolution de la courbe de consommation de notre serveur en fonction du nombre de coeurs chargés par un stress. Nous nous intéresserons ici à la 
 consommation globale du host, pas à la consommation individuelle estimée de chaque programme. 
@@ -78,4 +84,18 @@ qu'elle soit executée sur un serveur à vide ou un serveur déjà remplis ?
 
 Reproduire la construction de ce profil via différents stress. Qu'observez-vous ? Qu'en déduisez-vous sur la relation entre charge CPU et consommation énergétique ? 
 
-### Tâche 2 
+### Tâche 2.2 - Impact de Turbo boost et hyperthreading sur la consommation énergétique
+Les processeurs modernes embarque plusieurs fonctionnalités permettant d'optimiser leurs performances et leur consommation énergétique en fonction de leurs besoins. 
+Nous allons étudier l'impact de deux de ces fonctionnalités sur le profil de consommation énergétique d'un serveur : turbo boost et hyperthreading. 
+
+Pour rappel : 
+- Turbo boost permets d'ajuster dynamiquement la fréquence des coeurs du processeur en fonction des besoins de calculs 
+- Hyperthreading permets de faire fonctionner plusieurs threads en parallèle sur un même coeur (via un mécanisme de "coeurs virtuels")
+
+Par défault ces deux mécanismes sont activés sur Grid5000. C'est en effet le type de configuration que l'on trouve activé par défault sur les serveurs car ils 
+ont un intérêt significatif sur leurs performances. Nous allons nous intéresser ici à leur impact sur la courbe de consommation d'un serveur. 
+
+Grid5000 permets d'activer et désactiver dynamiquement ces fonctionnalités. Vous trouverez comment faire dans la documentation présente ici : https://www.grid5000.fr/w/CPU_parameters#Setting_CPU_parameters:_Hyperthreading,_C-State,_P-State_and_Turboboost
+
+Essayez de reproduire la construction du profil de consommation énergétique du serveur (Tâche 2.1) en désactivant hyperthreading et turbo boost. Qu'observez-vous ? 
+Quelle est la différence entre la courbe que vous observez ici et celle que vous avez obtenu lors de la tâche 2.1 ? 
