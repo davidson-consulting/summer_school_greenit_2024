@@ -1,4 +1,3 @@
-
 import time
 import os
 import subprocess
@@ -11,6 +10,11 @@ import matplotlib.pyplot as plt
 # Fonction de stress lancé par défaut
 DEFAULT_FUNC = "sqrt"
 
+# Nombre d'operation à effectuer Ce nombre d'operation permet de garantir que la
+# fonction de stress effectue toujours le même travail, même lancé en parallèle
+# avec d'autre charges
+NB_OPS = 30000
+
 #
 # Parse le argument de ligne de commande
 # @returns: les arguments
@@ -18,7 +22,7 @@ DEFAULT_FUNC = "sqrt"
 def parseArguments ():
     parser = argparse.ArgumentParser ()
     parser.add_argument ("--func_name", default=DEFAULT_FUNC)
-    parser.add_argument ("--duration", type=int, default=5)
+    parser.add_argument ("--nb_ops", type=int, default=NB_OPS)
     parser.add_argument ("--min_cpu", default=1, type=int)
     parser.add_argument ("--max_cpu", default=os.cpu_count (), type=int)
 
@@ -71,6 +75,8 @@ def plotResult (pids, power_procs, power_host, imageName) :
 # @returns:
 #    - [0] : la consommation (puissance) maximal observé sur l'hote
 #    - [1] : la consommation (puissance) maximal du stress le plus consommateur
+#    - [2] : la consmmation d'énergie observé sur l'hote
+#    - [3] : la consmmation d'energie du stress le plus consommateur
 #
 def exportResults (pids, imageName):
     pathlib.Path(f".output/").mkdir(parents=True, exist_ok=True)
@@ -78,14 +84,24 @@ def exportResults (pids, imageName):
     power_host = []
     power_procs = []
 
-    #
-    # TODO: Les résultats fourni par scaphandre fournisse une liste de consommation (puissance)
-    # 1. Remplir le tableau power_host avec la consommation observé sur l'hote par timestamp
-    # 2. Remplir le tableau power_procs avec la consommation des processus dans "pids"
-    #
+    for result in loadScaphandreResults () :
+        power_procs.append ({str (pid) : 0 for pid in pids})
 
-    # Retrouver la consommation maximal de l'hote, et la consommation maximal du processus le plus consommateur
-    return (0, 0)
+        # scaphandre retourne les résultat en micro watts
+        power_host.append (result["host"]["consumption"] / 1000000)
+        for consumer in result["consumers"]:
+            if str(consumer["pid"]) in pids:
+                power_procs [-1][str (consumer ["pid"])] += (consumer["consumption"] / 1000000)
+
+    plotResult (pids, power_procs, power_host, imageName)
+
+    # 1 joule c'est 1W pendant 1 seconde, donc on doit diviser par le fréquence pour correctement integrer la courbe
+    energy_procs = [sum ([power_procs [i][p] for i in range(len (power_procs))])  for p in pids]
+    power_max_procs = [max ([power_procs [i][p] for i in range(len (power_procs))])  for p in pids]
+    energy_host = sum (power_host)
+
+    return (max (power_host), max (power_max_procs), energy_host, max (energy_procs))
+
 
 #
 # Démarre scaphandre
@@ -99,6 +115,23 @@ def startScaphandre ():
     return subprocess.Popen (["scaphandre", "json", "--max-top-consumers", "50", "-s", "1", "-f", "/tmp/results.json"])
 
 #
+# Arrête scaphandre, et export les résultats
+# @params:
+#    - scaph: le process de scaphandre (cf. startScaphandre)
+#    - pids: la liste de PIDS observés
+#    - imageName: le nom de l'image dans laquel faire l'export
+#
+# @returns:
+#    - [0] : la consommation (puissance) maximal observé sur l'hote
+#    - [1] : la consommation (puissance) maximal du stress le plus consommateur
+#    - [2] : la consmmation d'énergie observé sur l'hote
+#    - [3] : la consmmation d'energie du stress le plus consommateur
+#
+def stopScaphandre (scaph, pids, imageName) :
+    scaph.kill ()
+    return exportResults (pids, imageName)
+
+#
 # Lance une experience
 # @params:
 #    - functionName: le nom de la fonction stress à lancer
@@ -108,18 +141,25 @@ def startScaphandre ():
 # @returns:
 #    - [0] : la consommation (puissance) maximal observé sur l'hote
 #    - [1] : la consommation (puissance) maximal du stress le plus consommateur
+#    - [2] : la consmmation d'énergie observé sur l'hote
+#    - [3] : la consmmation d'energie du stress le plus consommateur
 #
-def runExperiment (functionName, nbCores, nbOps, duration):
-    #
-    #  TODO :
-    #  1. Lancer scaphandre
-    #  2. Lancer nbCores stress dans le cgroup cpu:/pg1
-    #  3. Récuperer leurs PID
-    #  4. Stopper scaphandre,
-    #  5. exporter les résultats
-    #
+def runExperiment (functionName, nbCores, nbOps):
+    processes = []
+    scaph = startScaphandre ()
+    time.sleep (1)
 
-    return (0, 0)
+    for _ in range (nbCores) :
+        processes.append (subprocess.Popen (["cgexec", "-g", "cpu:/pg1", "stress-ng", "-c", "1", "--cpu-method", functionName, "--cpu-ops", str (nbOps)]))
+
+    time.sleep (1)
+    pids = get_pids_in_cgroup ("pg1")
+
+    for process in processes :
+        process.wait ()
+
+    time.sleep (1)
+    return stopScaphandre (scaph, pids, str (nbCores))
 
 
 def main (arguments) :
@@ -128,24 +168,37 @@ def main (arguments) :
 
     hostP = []
     processP = []
+    hostE = []
+    processE = []
 
     # En faisant monter la charge de 1 à n cores
     for nbCores in range (arguments.min_cpu, arguments.max_cpu + 1) :
-        #
-        # TODO:
-        # 1. lancer les experiences de 1 à N cores
-        # 2. récuperer le consommation (puissance) de l'hote et du processus le plus cher
-        #
-        pass
+        (host_power, process_power, host_energy, process_energy) = runExperiment (arguments.func_name, nbCores, arguments.nb_ops)
+        hostP.append (host_power)
+        processP.append (process_power)
+
+        hostE.append (host_energy)
+        processE.append (process_energy)
 
     print ("Host power : ", hostP)
     print ("Process power : ", processP)
+    print ("Host energy : ", hostE)
+    print ("Process energy : ", processE)
 
+    # On plot la courbe de consmmation (puissance) en fonction du nombre de cores
+    plt.clf ()
+    plt.plot (hostP, label="host")
+    plt.plot (processP, label="process")
+    plt.legend ()
+    plt.savefig (".output/power_curve.png", dpi=400)
 
-    #
-    # TODO: Générer le plot de la consommation puissance en fonction du nombre de coeur
-    #
-    #
+    # On plot la courbe de consmmation (energie) en fonction du nombre de cores
+    plt.clf ()
+    plt.plot (hostE, label="host")
+    plt.plot (processE, label="process")
+    plt.legend ()
+    plt.savefig (".output/energy_curve.png", dpi=400)
+
 
 
 # Python...

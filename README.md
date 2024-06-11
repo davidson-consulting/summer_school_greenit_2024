@@ -54,9 +54,9 @@ Des utilitaires comme `htop` sont très pratique pour étudier la consommation d
 différents stress en comparaison de leur consommation CPU. Que pourriez-vous en déduire entre le lien entre pourcentage d'utilisation CPU et consommation énergétique ?
 Plus précisément, la consommation énergétique est-elle directement liée au pourcentage d'utilisation CPU ? 
 
-**Notes :** Pour facilier la récupération de la consommation des différents stress lancé, il est conseillé de les executer dans des *cgroups*. Pour rappel, 
+**Notes :** Pour faciliter la récupération de la consommation des différents stress lancé, il est conseillé de les executer dans des *cgroups*. Pour rappel, 
 les cgroups sont une fonctionnalité de Linux permettant de lancer plusieurs processus dans des groupes logiques. Les cgroups sont à l'origine utilisés pour 
-affecter des limites de ressources (CPU, mémoire...) à divers groupes de processus. Nous les utiliserons ici pour facilier la récupération des PIDs des stress
+affecter des limites de ressources (CPU, mémoire...) à divers groupes de processus. Nous les utiliserons ici pour faciliter la récupération des PIDs des stress
 lancés. 
 
 Quelques commandes pour manipuler les cgroups :
