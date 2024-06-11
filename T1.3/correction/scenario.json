@@ -1,0 +1,12 @@
+[
+    {
+        "function_name" : "none",
+        "nb_cores" : 0,
+        "duration" : 7
+    },
+    {
+        "function_name" : "ackermann",
+        "nb_cores" : 4,
+        "duration" : 10
+    }
+]

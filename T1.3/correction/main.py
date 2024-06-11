@@ -64,6 +64,8 @@ def plotResult (power_app, power_host, noise) :
     plt.legend ()
     plt.savefig (f".output/timeline.png", dpi=400)
 
+
+
 #
 # Lis les résultats et génère les courbes de consommation et d'estimation
 # @params:
@@ -76,14 +78,23 @@ def exportResults (pids):
     power_procs = []
     noise = []
 
-    #
-    # TODO: Les résultats fourni par scaphandre fournisse une liste de consommation (puissance)
-    # 1. Remplir le tableau power_host avec la consommation observé sur l'hote par timestamp
-    # 2. Remplir le tableau power_procs avec la consommation des processus dans "pids"
-    # 3. Remplir le tableau noise avec la consommation des processus "stress" qui ne sont pas dans "pids"
-    # 4. Générer les plots des courbes de consommation
-    # 5. Afficher la consommation maximal de l'hote, et la consommation maximal du processus le plus consommateur
-    #
+    for result in loadScaphandreResults () :
+        power_procs.append (0)
+        noise.append (0)
+
+        # scaphandre retourne les résultats en micro watts
+        power_host.append (result["host"]["consumption"] / 1000000)
+
+        for consumer in result["consumers"]:
+            if str(consumer["pid"]) in pids:
+                power_procs [-1] += (consumer ["consumption"] / 1000000)
+            elif ("stress" in str (consumer ["exe"])):
+                noise [-1] += (consumer ["consumption"] / 1000000)
+
+    plotResult (power_procs, power_host, noise)
+
+    print ("Power conso max host : ", max (power_host), "W")
+    print ("Power conso max procs : ", max (power_procs), "W")
 
 #
 # Démarre scaphandre
@@ -108,11 +119,15 @@ def startScaphandre ():
 #    - [0] : la liste de PID de l'application baseline
 #    - [1] : les process (python) pour attendre la fin des stress
 def startBaselineLoad (functionName, nbCores, duration):
-    #
-    # TODO: lancer les stress de l'application baseline et retourner leurs PIDs
-    #
+    processes = []
+    for _ in range (nbCores) :
+        processes.append (subprocess.Popen (["cgexec", "-g", "cpu:/pg1", "stress-ng", "-c", "1", "--cpu-method", functionName, "-t", str (duration)]))
 
-    return []
+    time.sleep (1)
+    pids = get_pids_in_cgroup ("pg1")
+    print (pids)
+    return (pids, processes)
+
 
 #
 # Lance une experimentation (application 'baseline', puis lecture du scenario)
@@ -123,12 +138,11 @@ def startBaselineLoad (functionName, nbCores, duration):
 #    - scenario: liste de dictionnaire décrivant un scénario (ex: [{'function_name' : 'sqrt', 'nb_cores' : 4, 'duration' : 10}])
 #
 def runExperiment (baselineFunction, nbCores, duration, scenario):
-    #
-    # TODO:
-    # 1. Lancer scaphandre
-    # 2. Lancer l'application 'baseline'
-    # 3. Jouer le scenario
-    #
+    processes = []
+    scaph = startScaphandre ()
+    time.sleep (1)
+
+    (pids, processes) = startBaselineLoad (baselineFunction, nbCores, duration)
 
     for l in scenario :
         print ("Next scenar", l)
@@ -136,13 +150,24 @@ def runExperiment (baselineFunction, nbCores, duration, scenario):
         name = l ["function_name"]
         cores = l ["nb_cores"]
         dur = l ["duration"]
-        # TODO: Lancer les stress de bruit, attendre la durée défini, et stopper les processus de bruit
+        # Lance les stress de bruit
+        for _ in range (cores) :
+            scenarioPR.append (subprocess.Popen (["stress-ng", "-c", "1", "--cpu-method", str (name), "-t", str (dur)]))
 
-    #
-    # 4. Attendre la fin de l'application 'baseline
-    # 5. Arreter l'xp et on export les résultat
-    #
+        time.sleep (dur)
+        # arrete les stress de bruit après 'dur' secondes
+        for p in scenarioPR :
+            p.kill ()
 
+    # On attend la fin de l'application nominal
+    for p in processes :
+        p.wait ()
+
+    time.sleep (2)
+
+    # On arrete l'xp et on export les résultat
+    scaph.kill ()
+    exportResults (pids)
 
 def main (arguments) :
     # Création d'un cgroup pour retrouver les PID de l'application 'baseline'
