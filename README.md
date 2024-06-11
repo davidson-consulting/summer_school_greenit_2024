@@ -19,7 +19,8 @@ Déploiement de l'OS : `kadeploy3 ubuntu2204-min`
 
 Installation des dépendances : 
 - Quelques packages `apt install stress-ng git`
-- Scaphandre (https://github.com/hubblo-org/scaphandre) - Nous utiliserons la version 0.5.0 de Scaphandre
+- Scaphandre (https://github.com/hubblo-org/scaphandre) - Nous utiliserons la version 0.5.0 de Scaphandre, récupérable de la façon suivante : 
+`wget https://github.com/hubblo-org/scaphandre/releases/download/v0.5.0/scaphandre-x86_64-unknown-linux-gnu`
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 
