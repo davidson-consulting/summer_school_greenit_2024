@@ -51,26 +51,42 @@ Pouvez-vous automatiser une telle expérimentation en Python ? Reproduire l'exp�
 Des utilitaires comme HTOP sont très pratique pour étudier la consommation de ressources de notre serveur en temps réel. Etudier la consommation énergétique de nos 
 différents stress en comparaison de leur consommation CPU. Que pourriez-vous en déduire entre le lien entre charge CPU et consommation énergétique ? 
 
+**Notes :** Pour facilier la récupération de la consommation des différents stress lancé, il est conseillé de les executer dans des *cgroups*. Pour rappel, 
+les cgroups sont une fonctionnalité de Linux permettant de lancer plusieurs processus dans des groupes logiques. Les cgroups sont à l'origine utilisés pour 
+affecter des limites de ressources (CPU, mémoire...) à divers groupes de processus. Nous les utiliserons ici pour facilier la récupération des PIDs des stress
+lancés. 
+
+Quelques commandes pour manipuler les cgroups :
+- Créer un cgroup : `cgcreate -g cpu:/MONCGROUP`
+- Lancer un stress dans un cgroup : `cgcreate -g cpu:/MONCGROUP stress -c 1`
+- Afficher les PIDs des processus lancés dans notre cgroup : `cat /sys/fs/cgroup/MONCGROUP/cgroup.procs`
 
 ### Tâche 1.3 - Puissance sur plusieurs programmes en parallèle
-Nous avons vu qu'un même programme peut induire une consommation différente selon son contexte d'execution. Nous allons illustrer cela un peu plus en étudiant la 
+Nous avons commencé à voir qu'un même programme peut induire une consommation différente selon son contexte d'execution. Nous allons illustrer cela un peu plus en étudiant la 
 consommation d'un stress selon qu'il est lancé seul ou en parallèle d'autres stress. Le scénario d'expérimentation est le suivant : lancer un premier stress et 
-étudier sa consommation énergétique. Lancer un second stress en parallèle du premier. Qu'observez-vous ?
+étudier sa consommation énergétique. 
 
-Note : L'inconvénient d'utiliser que des stress est que le nom de toutes les applications sera le même. Il va être important de récupérer le PID des différents
-stress lancés pour pouvoir les distinguer par la suite. 
+![Un stress lancé seul](./figures/P_0_alone.png)
+
+Lancer un second stress en parallèle du premier. Qu'observez-vous vis à vis de la consommation du premier stress ?
+Pour rappel, les stress ont des comportements très stables. Retrouve-t-on ce comportement lorsque du "bruit" est généré 
+en parallèle de notre stress ? 
+
+![Deux stress lancés en parallèle](./figures/P_0_et_P_1.png)
 
 ### Tâche 1.4 - Consommation énergétique d'un stress
 Nous nous sommes intéressés ici qu'à la puissance estimée d'un stress selon son contexte d'execution. Nous avons vu notamment qu'elle diminue 
 en fontion du nombre de stress lancé. Qu'en est-il de sa consommation énergétique ? 
 
-Note : pour rappel, la consommation énergétique en Joules correspond à la puissance (en Watts) multiplié par le temps. 
+**Note :** pour rappel, la consommation énergétique en Joules correspond à la puissance (en Watts) multiplié par le temps. 
 
 Il est possible de configurer stress pour lancer un nombre défini d'opérations, garantissant une même quantité de travail. Lancez un stress d'un nombre fixe 
-d'opérations sur un coeur et estimez sa consommation en joules. Lancez ce même stress sur plusieurs coeurs et étudier l'impact sur la consommation en joules. 
+d'opérations et estimez sa consommation en joules. Lancez en un autre et estimez sa consommation en joule. Lancez les deux en parallèle et estimez leurs 
+consommation respectives. Pour deux stress A et B, obtenez-vous toujours une même relation d'ordre entre consommation "seule" de A puis de B et la consommation 
+"en parallèle" de A et B ?
 
 ## Partie 2 - Comprendre la consommation énergétique d'un serveur
-Nous avons vu dans la première partie que la consommation énergétique d'un programme (ici *stress*) peut fluctuer en fonction de son environnement d'execution. 
+Nous avons vu dans la première partie que la consommation énergétique d'un programme (ici *stress*) fluctue en fonction de son environnement d'execution. 
 Nous allons dans cette partie essayer de comprendre un peu mieux pourquoi.
 
 ### Tâche 2.1 - Profil de consommation d'un serveur 
