@@ -20,11 +20,11 @@ Les accès aux noeuds Grid5000 se font principalement via SSH.
 Si vous pouvez/voulez vous connecter via un shell local :
 1. Se connecter à Grid5000 via `ssh login@access.grid5000.fr`
 2. Se connecter au site de Nantes via `ssh nantes`
+3. Si vous n'avez pas de clé SSH, ils vous faudra en générer une (via `Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
+` par exemple) et associer la clé publique à votre compte (https://api.grid5000.fr/ui/account). 
 
 Si vous préférez éviter d'utiliser un shell local :
 1. Vous pouvez accéder à un shell via votre navigateur web à l'adresse suivante : https://intranet.grid5000.fr/shell/nantes/
-
-Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
 
 Réservation d'un serveur : `oarsub -r now -t inner=258135 -l walltime=2:00 -t deploy`
 
