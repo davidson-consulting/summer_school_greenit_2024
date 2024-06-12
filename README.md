@@ -74,9 +74,15 @@ Pouvez-vous automatiser une telle expérimentation en Python (à partir du scrip
 
 Afficher les courbes de consommations de puissance des différent scénario, ainsi que la puissance associé au processus en fonction du nombre de coeurs utilisé sur la machine.
 
-Des utilitaires comme `htop` sont très pratique pour étudier la consommation de ressources de notre serveur en temps réel. Etudier la consommation énergétique de nos 
-différents stress en comparaison de leur consommation CPU. Que pourriez-vous en déduire entre le lien entre pourcentage d'utilisation CPU et consommation énergétique ?
-Plus précisément, la consommation énergétique est-elle directement liée au pourcentage d'utilisation CPU ? 
+Des utilitaires comme `htop` sont très pratique pour étudier la consommation de
+ressources de notre serveur en temps réel. Vjoule avec l'utilitaire 'vjoule top'
+permet aussi d'afficher la consommation en direct via une interface à la 'htop'
+(https://github.com/davidson-consulting/vjoule/releases/tag/v1.3.0). Etudier la
+consommation énergétique de nos différents stress en comparaison de leur
+consommation CPU. Que pourriez-vous en déduire entre le lien entre pourcentage
+d'utilisation CPU et consommation énergétique ? Plus précisément, la
+consommation énergétique est-elle directement liée au pourcentage d'utilisation
+CPU ?
 
 **Notes :** Pour faciliter la récupération de la consommation des différents
 stress lancé, il est conseillé de les executer dans des *cgroups*. Les cgroups
