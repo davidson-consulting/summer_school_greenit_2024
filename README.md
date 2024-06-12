@@ -32,7 +32,7 @@ Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
 
 Executer les commandes suivantes en remplaçant JOBID (ligne 1) par l'identifiant obtenu juste avant
 ```
-SERVER=$(oarstat -j JOBID -J | jq '.[JOBID]["assigned_network_address"][0]')
+SERVER=$(oarstat -j JOBID -J | jq '.["JOBID"]["assigned_network_address"][0]')
 kadeploy3 -m $SERVER ubuntu2204-nfs
 
 ssh root@$SERVER apt update
