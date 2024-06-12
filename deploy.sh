@@ -1,4 +1,4 @@
-SERVER=$(oarstat -j $1 -J | jq '.["258103"]["assigned_network_address"][0]')
+SERVER=$(oarstat -j $1 -J | jq '.[$1]["assigned_network_address"][0]')
 kadeploy3 -m $SERVER ubuntu2204-nfs
 
 ssh root@$SERVER apt update
