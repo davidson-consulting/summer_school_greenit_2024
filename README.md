@@ -26,7 +26,7 @@ Si vous préférez éviter d'utiliser un shell local :
 
 Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
 
-Réservation d'un serveur : `oarsub -r now -t inner=258004 -l walltime=2:00 -t deploy`
+Réservation d'un serveur : `oarsub -r now -t inner=258135 -l walltime=2:00 -t deploy`
 
 Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
 
