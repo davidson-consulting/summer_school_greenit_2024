@@ -43,35 +43,48 @@ IO, ...).
 Scaphandre peut s'utiliser de plusieurs façon : 
 - En mode "ligne de commande" : en sélectionnant une sortie `stdout`, Scaphandre affiche la consommation estimée des 15 processus les plus consommateurs
 - En mode "script" : en sélectionnant la sortie `json`, Scaphandre écrit ses estimations dans un fichier de sortie au format JSON. 
-- En mode "export" : Scaphandre peut exporter ses résultats vers un composant tier comme Prometheus. Un fichier docler-compose est proposé dans le répertoire
+- En mode "export" : Scaphandre peut exporter ses résultats vers un composant tier comme Prometheus. Un fichier docker-compose est proposé dans le répertoire
 Github du projet pour déployer facilement un Dashboard Scaphandre. 
 
 ### Tâche 1.1 - Puissance sur un coeur CPU
 Dans un premier temps, nous allons découvrir Scaphandre en le testant sur diverses fonctions stress. Vous pouvez trouver la liste des fonctions proposées 
-par stress via la commande `stress-ng --cpu-method which`. En lançant diverses fonctions stress sur un même nombre de CPU, voyez-vous une différence de consommation ? 
-Lister quelques exemples de commandes stress et leur coût associé en Watts.
+par stress via la commande `stress-ng --cpu-method which`.
 
-Ecrire un script python permettant de lancer une commande stress passée en paramètre et d'évaluer sa consommation via Scaphandre.
+
+**Objectifs** : À la main, en lançant diverses fonctions stress sur un même nombre de coeurs CPU, voyez-vous une différence de consommation ? 
+Lister quelques exemples de commandes stress et leur coût associé en Watts.
 
 ### Tâche 1.2 - Puissance sur plusieurs coeurs CPU 
 Nous allons maintenant évaluer la consommation d'un même stress sur plusieurs coeurs. Pour charger N coeurs, stress lance N instances de l'application 
-demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donné, évaluer sa consommation quand il est lancé sur 1 coeur, puis plusieurs. Qu'observez-vous 
-vis à vis de l'évolution de la consommation de chaque stress par rapport à l'augmentation de la charge serveur ?
+demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donné, évaluer sa consommation quand il est lancé sur 1 coeur, puis plusieurs. 
 
-Pouvez-vous automatiser une telle expérimentation en Python ? Reproduisez l'expérimentation sur plusieurs opérations de stress différentes.
+**Objectifs**: À la main, lancer 1 à N stress et observer la consommation (en puissance) assigné au différent applications.
+Qu'observez-vous vis à vis de l'évolution de la consommation de chaque stress par rapport à l'augmentation de la charge serveur ?
+
+Pouvez-vous automatiser une telle expérimentation en Python (à partir du script T1.2/main.py) ? Reproduisez l'expérimentation sur plusieurs opérations de stress différentes. 
+Les fonctions de stress CPU utilisable pour charger le CPU: 
+- Des algorithmes: ackermann, queens, fibonnacci, matrixprod
+- Des stress d'instructions mathématique specifiques : float64, int64, decimal64, double
+- Génération de nombre pseudo-aléatoire : rand
+- Des stress d'instructions de conversion : int64float, int64double.
+
+Afficher les courbes de consommations de puissance des différent scénario, ainsi que la puissance associé au processus en fonction du nombre de coeurs utilisé sur la machine.
 
 Des utilitaires comme `htop` sont très pratique pour étudier la consommation de ressources de notre serveur en temps réel. Etudier la consommation énergétique de nos 
 différents stress en comparaison de leur consommation CPU. Que pourriez-vous en déduire entre le lien entre pourcentage d'utilisation CPU et consommation énergétique ?
 Plus précisément, la consommation énergétique est-elle directement liée au pourcentage d'utilisation CPU ? 
 
-**Notes :** Pour faciliter la récupération de la consommation des différents stress lancé, il est conseillé de les executer dans des *cgroups*. Pour rappel, 
-les cgroups sont une fonctionnalité de Linux permettant de lancer plusieurs processus dans des groupes logiques. Les cgroups sont à l'origine utilisés pour 
-affecter des limites de ressources (CPU, mémoire...) à divers groupes de processus. Nous les utiliserons ici pour faciliter la récupération des PIDs des stress
-lancés. 
+**Notes :** Pour faciliter la récupération de la consommation des différents
+stress lancé, il est conseillé de les executer dans des *cgroups*. Les cgroups
+sont une fonctionnalité de Linux permettant de lancer plusieurs processus dans
+des groupes logiques. Les cgroups sont à l'origine utilisés pour monitorer ou
+contraindre les ressources (CPU, mémoire...) associsées à divers groupes de
+processus. Nous les utiliserons ici pour faciliter la récupération des PIDs des
+stress lancés.
 
 Quelques commandes pour manipuler les cgroups :
 - Créer un cgroup : `cgcreate -g cpu:/MONCGROUP`
-- Lancer un stress dans un cgroup : `cgcreate -g cpu:/MONCGROUP stress -c 1`
+- Lancer un stress dans un cgroup : `cgexec -g cpu:/MONCGROUP stress -c 1`
 - Afficher les PIDs des processus lancés dans notre cgroup : `cat /sys/fs/cgroup/MONCGROUP/cgroup.procs`
 
 ### Tâche 1.3 - Puissance sur plusieurs programmes en parallèle
@@ -84,32 +97,42 @@ consommation d'un stress selon qu'il est lancé seul ou en parallèle d'autres s
 2) Lancer un second stress en parallèle du premier. 
 ![Deux stress lancés en parallèle](./figures/P_0_et_P_1.png)
 
-Qu'observez-vous vis à vis du profil de consommation du premier stress ?
-Pour rappel, les stress ont des comportements très stables. Retrouve-t-on ce comportement lorsque du "bruit" est généré 
-en parallèle de notre stress ?
 
-Dans des environnements cloud, les services numériques déployés par les utilisateurs sont bien souvent mutualisés sur un nombre réduit de serveurs. 
+**Objectifs** : En partant du script T1.3/main.py, écrivez un script permettant de lancer une application de stress utilisant plusieurs coeurs CPU. 
+Compléter ce script pour qu'il joue un scénario d'applications injectant du "bruit". Un exemple de scénario est présenté dans T1.3/scenario.json.
+
+Qu'observez-vous vis à vis du profil de consommation du premier stress ? (en jouant plusieurs scénario de bruit).
+Pour rappel, les stress ont des comportements très stables (facilement verifiable en lançant l'application seule). 
+Retrouve-t-on ce comportement lorsque du "bruit" est généré en parallèle de notre stress ? (notemment en utilisant uniquement les coeurs physique pour limiter la contention ?)
+
+***Note**: Dans des environnements Cloud, les services numériques déployés par les utilisateurs sont bien souvent mutualisés sur un nombre réduit de serveurs. 
 Un utilisateur n'a donc pas de vision sur l'état du serveur sur lequel il est déployé : ses spécifications et l'évolution de sa charge due aux autres 
 utilisateurs. De ce que vous observez sur ces expérimentations, que pouvez-vous dire des estimations de consommations fournies par ces sondes logicielles 
-dans ces environnements cloud ? 
+dans ces environnements Cloud ? 
 
 ### Tâche 1.4 - Consommation énergétique d'un stress
 Nous nous sommes intéressés ici qu'à la puissance estimée d'un stress selon son contexte d'execution. Nous avons vu notamment qu'elle diminue 
 en fontion du nombre de stress lancé. Qu'en est-il de sa consommation énergétique ?
 
-**Note :** pour rappel, la consommation énergétique en Joules correspond à la puissance (en Watts) multiplié par le temps. 
+**Note :** Pour rappel, la consommation énergétique en Joules correspond à l'integrale de la puissance (en Watts). Comme nous faisons un mesure de puissance par seconde, calculer l'énergie est simple, on fait la somme. 
 
-A partir d'une certaine charge, une contention sur les ressources serveurs commence à apparaitre. Cette contention emmene à une augmentation 
-du temps d'execution. Cette augmentation compense-t-elle la réduction du coût énergétique à haute charge ? 
+A partir d'une certaine charge, une contention sur les ressources serveurs
+commence à apparaitre (surtout quand on commence à utiliser les coeurs
+logiques). Cette contention emmene à une augmentation du temps d'execution.
+Cette augmentation compense-t-elle la réduction du coût énergétique à haute
+charge ?
 
-Il est possible de configurer stress pour lancer un nombre défini d'opérations, garantissant une même quantité de travail. En vous basant sur 
-les scripts précédents, dressez la courbe de la consommation énergétique (en Joules) d'un stress en fonction du nombre de coeurs chargés. 
-Observez-vous toujours une réduction de la consommation avec l'augmentation de la charge serveur ?
+**Objectifs:** Il est possible de configurer stress pour lancer un nombre défini d'opérations, garantissant une même quantité de travail. En vous basant sur 
+le script développé pendant la tâche 1.2, dressez la courbe de la consommation énergétique (en joules) d'un stress en fonction du nombre de coeurs chargés. 
+Observez-vous toujours une réduction de la consommation avec l'augmentation de la charge serveur ? 
 
-Nous allons maintenant nous intéresser à la capacité de scaphandre à correctement diviser la consommation énergétique d'un serveur sur plusieurs processus. Lancez un stress 
-d'un nombre fixe d'opérations et estimez sa consommation en joules. Lancez en un autre et estimez sa consommation en joule. Lancez les deux en parallèle et estimez leurs 
-consommation respectives. Pour deux stress A et B, obtenez-vous toujours une même relation d'ordre entre consommation "seule" de A puis de B et la consommation 
-"en parallèle" de A et B ?
+En reprenant le script développé dans la tâche 1.3, calculer la consommation d'énergie de l'application "baseline". 
+En jouant différent scénario, observer la consommation d'énergie de l'application "baseline", est elle stable ?
+
+
+**Questions**: 
+Que peut on en déduire quand à notre capacité à trier les applications par leur consommation d'énergie ?
+Comment peut on définir la "Consommation énergétique d'un logiciel" ?
 
 ## Partie 2 - Comprendre la consommation énergétique d'un serveur
 Nous avons vu dans la première partie que la consommation énergétique d'un programme (ici *stress*) fluctue en fonction de son environnement d'execution. 
@@ -120,11 +143,12 @@ Nous avons vu dans la tâche 1.2 qu'un même stress ne consommait pas autant d'�
 ici étudier l'évolution de la courbe de consommation de notre serveur en fonction du nombre de coeurs chargés par un stress. Nous nous intéresserons ici à la 
 consommation globale du host, pas à la consommation individuelle estimée de chaque programme. 
 
-Ecrire un script permettant d'illustrer la consommation de votre serveur en fonction du nombre de coeurs chargé par un stress. Dresser son profil de consommation 
-de 0 à MAX coeurs. Comment charactériser la courbe de consommation de ce serveur ? Quel impact aura cette courbe de consommation sur le coût d'une application, selon 
+**Objectifs**: En reprenant les script développé dans la tâche 1.4, afficher la courbe de consommation de l'hote en fonction de sa charge. 
+Comment charactériser la courbe de consommation de ce serveur ? Quel impact aura cette courbe de consommation sur le coût d'une application, selon 
 qu'elle soit executée sur un serveur à vide ou un serveur déjà remplis ? 
 
-Reproduire la construction de ce profil via différents stress. Qu'observez-vous ? Qu'en déduisez-vous sur la relation entre charge CPU et consommation énergétique ? 
+Reproduire la construction de ce profil via différentes applications de stress (ex: sqrt, ackermann, fibonnacci, matrixprod, etc.).
+Qu'observez-vous ? Qu'en déduisez-vous sur la relation entre charge CPU et consommation énergétique ? 
 
 ### Tâche 2.2 - Impact de Turbo boost et hyperthreading sur la consommation énergétique
 Les processeurs modernes embarque plusieurs fonctionnalités permettant d'optimiser leurs performances et leur consommation énergétique en fonction de leurs besoins. 
