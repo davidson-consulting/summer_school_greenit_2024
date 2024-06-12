@@ -77,7 +77,7 @@ def exportResults (pids):
     noise = []
 
     #
-    # TODO: Les résultats fourni par scaphandre fournisse une liste de consommation (puissance)
+    # TODO: Les résultats fourni par scaphandre fournissent une liste de consommation (puissance)
     # 1. Remplir le tableau power_host avec la consommation observé sur l'hote par timestamp
     # 2. Remplir le tableau power_procs avec la consommation des processus dans "pids"
     # 3. Remplir le tableau noise avec la consommation des processus "stress" qui ne sont pas dans "pids"
