@@ -41,6 +41,9 @@ ssh root@$SERVER wget https://github.com/hubblo-org/scaphandre/releases/download
 ssh root@$SERVER chmod a+x /usr/bin/scaphandre
 ssh root@$SERVER
 ```
+Le déploiement du serveur va monter votre répertoire utilisateur (présent à `/home/MON_USERNAME`). Dedans, vous trouverez un répertoire `public.` Tous 
+les fichiers mis dedans seront disponible à l'URL suivante : `https://api.grid5000.fr/sid/sites/nantes/public/MON_USERNAME`. Vous pouvez procédez comme 
+cela pour récupérer les graphiques générés lors des expérimentations.
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 
