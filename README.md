@@ -51,7 +51,11 @@ demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donn
 Qu'observez-vous vis à vis de l'évolution de la consommation de chaque stress par rapport à l'augmentation de la charge serveur ?
 
 Pouvez-vous automatiser une telle expérimentation en Python (à partir du script T1.2/main.py) ? Reproduisez l'expérimentation sur plusieurs opérations de stress différentes. 
-Les fonctions de stress CPU utilisable pour charger le CPU : sqrt, ackermann, queens, float64, int64, decimal64, double, fibonnacci, matrixprod, rand, int64float, int64double.
+Les fonctions de stress CPU utilisable pour charger le CPU: 
+- Des algorithmes: ackermann, queens, fibonnacci, matrixprod
+- Des stress d'instructions mathématique specifiques : float64, int64, decimal64, double
+- Génération de nombre pseudo-aléatoire : rand
+- Des stress d'instructions de conversion : int64float, int64double.
 
 Afficher les courbes de consommations de puissance des différent scénario, ainsi que la puissance associé au processus en fonction du nombre de coeurs utilisé sur la machine.
 
