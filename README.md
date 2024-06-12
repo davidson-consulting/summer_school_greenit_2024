@@ -42,7 +42,7 @@ ssh root@$SERVER chmod a+x /usr/bin/scaphandre
 ssh root@$SERVER
 ```
 Le déploiement du serveur va monter votre répertoire utilisateur (présent à `/home/MON_USERNAME`). Dedans, vous trouverez un répertoire `public.` Tous 
-les fichiers mis dedans seront disponible à l'URL suivante : `https://api.grid5000.fr/sid/sites/nantes/public/MON_USERNAME`. Vous pouvez procédez comme 
+les fichiers mis dedans seront disponible à l'URL suivante : `https://api.grid5000.fr/sid/sites/nantes/public/MON_USERNAME/`. Vous pouvez procédez comme 
 cela pour récupérer les graphiques générés lors des expérimentations.
 
 ## Partie 1 - Utilisation de Scaphandre
