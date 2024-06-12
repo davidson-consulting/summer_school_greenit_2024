@@ -14,13 +14,23 @@ Objectifs de la session :
 ## Préparation de l'environnement 
 Cette session pratique va se dérouler sur un cluster Nantais de Grid5000 : ecotype. Nous allons dans un premier temps préparer notre environnement technique. 
 
-Réservation d'un serveur : `oarsub -I -p ecotype -l host=1,walltime=7:00 -t deploy`
+### Accès sur Grid5000
+Les accès aux noeuds Grid5000 se font principalement via SSH. 
+
+Si vous pouvez/voulez vous connecter via un shell local :
+1. Se connecter à Grid5000 via `ssh login@access.grid5000.fr`
+2. Se connecter au site de Nantes via `ssh nantes`
+
+Si vous préférez éviter d'utiliser un shell local :
+1. Vous pouvez accéder à un shell via votre navigateur web à l'adresse suivante : https://intranet.grid5000.fr/shell/nantes/
+
+Réservation d'un serveur : `oarsub -r now -t inner=258103 -l walltime=2:00 -t deploy`
 Déploiement de l'OS : `kadeploy3 ubuntu2204-min`
 
 Installation des dépendances : 
-- Quelques packages `apt install stress-ng git`
+- Quelques packages `apt install stress-ng git python3-pip cgroup-tools`
 - Scaphandre (https://github.com/hubblo-org/scaphandre) - Nous utiliserons la version 0.5.0 de Scaphandre, récupérable de la façon suivante : 
-`wget https://github.com/hubblo-org/scaphandre/releases/download/v0.5.0/scaphandre-x86_64-unknown-linux-gnu`
+`wget https://github.com/hubblo-org/scaphandre/releases/download/v0.5.0/scaphandre-x86_64-unknown-linux-gnu -O /usr/bin/scaphandre && chmod +x /usr/bin/scaphandre`
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 
