@@ -26,11 +26,21 @@ Si vous préférez éviter d'utiliser un shell local :
 
 Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
 
-Réservation d'un serveur : `oarsub -r now -t inner=258103 -l walltime=2:00 -t deploy`
+Réservation d'un serveur : `oarsub -r now -t inner=258135 -l walltime=2:00 -t deploy`
 
 Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
 
-Déploiement de l'OS : `sh deploy.sh JOB_ID` (en remplaçant JOB_ID par l'identifiant de job récupéré juste avant)
+Executer les commandes suivantes en remplaçant JOBID (ligne 1) par l'identifiant obtenu juste avant
+```
+SERVER=$(oarstat -j JOBID -J | jq '.[JOBID]["assigned_network_address"][0]')
+kadeploy3 -m $SERVER ubuntu2204-nfs
+
+ssh root@$SERVER apt update
+ssh root@$SERVER apt install -y python3-pip cgroup-tools
+ssh root@$SERVER wget https://github.com/hubblo-org/scaphandre/releases/download/v0.5.0/scaphandre-x86_64-unknown-linux-gnu -O /usr/bin/scaphandre 
+ssh root@$SERVER chmod a+x /usr/bin/scaphandre
+ssh root@$SERVER
+```
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 
