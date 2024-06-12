@@ -24,13 +24,13 @@ Si vous pouvez/voulez vous connecter via un shell local :
 Si vous préférez éviter d'utiliser un shell local :
 1. Vous pouvez accéder à un shell via votre navigateur web à l'adresse suivante : https://intranet.grid5000.fr/shell/nantes/
 
-Réservation d'un serveur : `oarsub -r now -t inner=258103 -l walltime=2:00 -t deploy`
-Déploiement de l'OS : `kadeploy3 ubuntu2204-min`
+Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
 
-Installation des dépendances : 
-- Quelques packages `apt install stress-ng git python3-pip cgroup-tools`
-- Scaphandre (https://github.com/hubblo-org/scaphandre) - Nous utiliserons la version 0.5.0 de Scaphandre, récupérable de la façon suivante : 
-`wget https://github.com/hubblo-org/scaphandre/releases/download/v0.5.0/scaphandre-x86_64-unknown-linux-gnu -O /usr/bin/scaphandre && chmod +x /usr/bin/scaphandre`
+Réservation d'un serveur : `oarsub -r now -t inner=258103 -l walltime=2:00 -t deploy`
+
+Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
+
+Déploiement de l'OS : `sh deploy.sh JOB_ID` (en remplaçant JOB_ID par l'identifiant de job récupéré juste avant)
 
 ## Partie 1 - Utilisation de Scaphandre
 Par simplicité, nous allons utiliser les fonctions stress comme applications à mesurer durant ce TP. 

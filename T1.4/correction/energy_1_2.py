@@ -29,7 +29,7 @@ def parseArguments ():
     return parser.parse_args ()
 
 #
-# Les stress sont lancé dans un cgroup (via cgexec) Les cgroups servent à
+# Les stress sont lancés dans un cgroup (via cgexec) Les cgroups servent à
 # regrouper des process dans des groupes pour monitorer/capper les ressources
 # auquels ils ont accés Dans notre cas, il nous serve à retrouver les PID des
 # processus, pour retrouver leurs consommations dans scaphandre
@@ -95,7 +95,7 @@ def exportResults (pids, imageName):
 
     plotResult (pids, power_procs, power_host, imageName)
 
-    # 1 joule c'est 1W pendant 1 seconde, donc on doit diviser par le fréquence pour correctement integrer la courbe
+    # 1 joule c'est 1W pendant 1 seconde, donc on doit diviser par la fréquence pour correctement integrer la courbe
     energy_procs = [sum ([power_procs [i][p] for i in range(len (power_procs))])  for p in pids]
     power_max_procs = [max ([power_procs [i][p] for i in range(len (power_procs))])  for p in pids]
     energy_host = sum (power_host)
@@ -185,14 +185,14 @@ def main (arguments) :
     print ("Host energy : ", hostE)
     print ("Process energy : ", processE)
 
-    # On plot la courbe de consmmation (puissance) en fonction du nombre de cores
+    # On plot la courbe de consommation (puissance) en fonction du nombre de cores
     plt.clf ()
     plt.plot (hostP, label="host")
     plt.plot (processP, label="process")
     plt.legend ()
     plt.savefig (".output/power_curve.png", dpi=400)
 
-    # On plot la courbe de consmmation (energie) en fonction du nombre de cores
+    # On plot la courbe de consommation (energie) en fonction du nombre de cores
     plt.clf ()
     plt.plot (hostE, label="host")
     plt.plot (processE, label="process")

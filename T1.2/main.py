@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 DEFAULT_FUNC = "sqrt"
 
 #
-# Parse le argument de ligne de commande
+# Parse les arguments de ligne de commande
 # @returns: les arguments
 #
 def parseArguments ():
@@ -25,9 +25,9 @@ def parseArguments ():
     return parser.parse_args ()
 
 #
-# Les stress sont lancé dans un cgroup (via cgexec) Les cgroups servent à
+# Les stress sont lancés dans un cgroup (via cgexec) Les cgroups servent à
 # regrouper des process dans des groupes pour monitorer/capper les ressources
-# auquels ils ont accés Dans notre cas, il nous serve à retrouver les PID des
+# auquels ils ont accès. Dans notre cas, ils nous servent à retrouver les PID des
 # processus, pour retrouver leurs consommations dans scaphandre
 #
 # @params:
@@ -84,7 +84,7 @@ def exportResults (pids, imageName):
     # 2. Remplir le tableau power_procs avec la consommation des processus dans "pids"
     #
 
-    # Retrouver la consommation maximal de l'hote, et la consommation maximal du processus le plus consommateur
+    # Retrouver la consommation maximale de l'hote, et la consommation maximal du processus le plus consommateur
     return (0, 0)
 
 #
