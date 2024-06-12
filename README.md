@@ -26,7 +26,7 @@ Si vous préférez éviter d'utiliser un shell local :
 
 Génération d'une clé SSH pour pouvoir vous connecter sur un serveur `ssh-keygen -t rsa -b 4096 -C "foo@bar.com"`
 
-Réservation d'un serveur : `oarsub -r now -t inner=258103 -l walltime=2:00 -t deploy`
+Réservation d'un serveur : `oarsub -r now -t inner=258004 -l walltime=2:00 -t deploy`
 
 Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
 
@@ -49,19 +49,28 @@ quantité de ressources données.
 **Note :** Stress est une suite d'applications permettant d'effectuer des tests de montée en charge configurables sur différents composants d'un serveur (CPU, mémoire, 
 IO, ...). 
 
-Scaphandre peut s'utiliser de plusieurs façon : 
+Scaphandre peut s'utiliser de plusieurs façons : 
 - En mode "ligne de commande" : en sélectionnant une sortie `stdout`, Scaphandre affiche la consommation estimée des 15 processus les plus consommateurs
 - En mode "script" : en sélectionnant la sortie `json`, Scaphandre écrit ses estimations dans un fichier de sortie au format JSON. 
 - En mode "export" : Scaphandre peut exporter ses résultats vers un composant tier comme Prometheus. Un fichier docker-compose est proposé dans le répertoire
 Github du projet pour déployer facilement un Dashboard Scaphandre. 
 
 ### Tâche 1.1 - Puissance sur un coeur CPU
-Dans un premier temps, nous allons découvrir Scaphandre en le testant sur diverses fonctions stress. Vous pouvez trouver la liste des fonctions proposées 
-par stress via la commande `stress-ng --cpu-method which`.
+Dans un premier temps, nous allons découvrir Scaphandre en le testant sur diverses fonctions stress. 
 
+Exemple de fonctions de stress utilisable pour charger le CPU: 
+- Des algorithmes: ackermann, queens, fibonnacci, matrixprod
+- Des stress d'instructions mathématiques specifiques : float64, int64, decimal64, double
+- Génération de nombres pseudo-aléatoires : rand
+- Des stress d'instructions de conversion : int64float, int64double
 
 **Objectifs** : À la main, en lançant diverses fonctions stress sur un même nombre de coeurs CPU, voyez-vous une différence de consommation ? 
 Lister quelques exemples de commandes stress et leur coût associé en Watts.
+
+**Notes** : Vous pouvez trouver la liste des fonctions proposées par stress via
+la commande `stress-ng --cpu-method which`. Pour lancer un stress sur un nombre
+de coeur donnée : `stress-ng -c ${nb_cores} --cpu-method ${func} -t
+${duration_in_sec}`
 
 ### Tâche 1.2 - Puissance sur plusieurs coeurs CPU 
 Nous allons maintenant évaluer la consommation d'un même stress sur plusieurs coeurs. Pour charger N coeurs, stress lance N instances de l'application 
@@ -71,11 +80,6 @@ demandée. Il s'agit donc du même programme, lancé N fois. Pour un stress donn
 Qu'observez-vous vis à vis de l'évolution de la consommation de chaque stress par rapport à l'augmentation de la charge serveur ?
 
 Pouvez-vous automatiser une telle expérimentation en Python (à partir du script T1.2/main.py) ? Reproduisez l'expérimentation sur plusieurs opérations de stress différentes. 
-Les fonctions de stress CPU utilisable pour charger le CPU: 
-- Des algorithmes: ackermann, queens, fibonnacci, matrixprod
-- Des stress d'instructions mathématique specifiques : float64, int64, decimal64, double
-- Génération de nombre pseudo-aléatoire : rand
-- Des stress d'instructions de conversion : int64float, int64double.
 
 Afficher les courbes de consommations de puissance des différent scénario, ainsi que la puissance associé au processus en fonction du nombre de coeurs utilisé sur la machine.
 
