@@ -26,7 +26,7 @@ Si vous pouvez/voulez vous connecter via un shell local :
 Si vous préférez éviter d'utiliser un shell local :
 1. Vous pouvez accéder à un shell via votre navigateur web à l'adresse suivante : https://intranet.grid5000.fr/shell/nantes/
 
-Réservation d'un serveur : `oarsub -r now -t inner=258135 -l walltime=2:00 -t deploy`
+Réservation d'un serveur : `oarsub -r now -t inner=258135 -l walltime=2:00 -t deploy --project "lab-2024-imta-greenit"`
 
 Récupération de l'identifiant ("Job id") de réservation `oarstat -u`
 
